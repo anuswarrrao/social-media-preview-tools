@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Media Preview Tool</title>
+  <link rel="icon" href="images.png"  type="image/x-icon" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FilePond CSS -->
+  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+
+  <style>
+    .aspect-box {
+      position: relative;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+
+    .aspect-box img,
+    .aspect-box video {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+    }
+
+    .profile-circle img {
+      border-radius: 9999px;
+    }
+
+    /* Customize FilePond container */
+    .filepond--root {
+      height: 180px;
+      border: 2px dashed #4f46e5;
+      border-radius: 1rem;
+      background: #eef2ff;
+      font-size: 1.1rem;
+      padding: 1rem;
+      cursor: pointer;
+    }
+
+    /* Hover style */
+    .filepond--root:hover {
+      background: #e0e7ff;
+    }
+
+    /* Label styling inside FilePond */
+    .filepond--drop-label {
+      color: #4f46e5;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    /* Horizontal alignment for platforms + post type */
+    .platforms-posttype {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .platforms-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">Social Media Preview Tool</h1>
+
+    <!-- Upload -->
+    <div class="mb-6">
+      <input type="file" id="fileInput" class="filepond" accept="image/png, image/jpeg, video/mp4">
+    </div>
+
+    <!-- Platforms + Post Type in one horizontal line -->
+    <div class="mb-6 platforms-posttype">
+      <div class="platforms-checkboxes">
+        <label><input type="checkbox" class="platform-checkbox" value="instagram" checked> Instagram</label>
+        <label><input type="checkbox" class="platform-checkbox" value="facebook" checked> Facebook</label>
+        <label><input type="checkbox" class="platform-checkbox" value="x" checked> X/Twitter</label>
+        <label><input type="checkbox" class="platform-checkbox" value="linkedin" checked> LinkedIn</label>
+        <label><input type="checkbox" class="platform-checkbox" value="youtube" checked> YouTube</label>
+        <label><input type="checkbox" class="platform-checkbox" value="threads" checked> Threads</label>
+        <label><input type="checkbox" class="platform-checkbox" value="whatsapp" checked> WhatsApp</label>
+      </div>
+      <div>
+        <select id="postTypeSelect" class="border p-2 rounded">
+          <option value="all">All Post Types</option>
+          <option value="profile">Profile Photo</option>
+          <option value="cover">Cover/Background/Channel Art</option>
+          <option value="feed">Feed/Posts</option>
+          <option value="stories">Stories/Reels/Shorts/Videos</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Preview Grid -->
+    <div id="previewGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+  </div>
+
+  <!-- FilePond JS -->
+  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+  <script
+    src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+
+  <script>
+FilePond.registerPlugin(FilePondPluginFileValidateType);
+
+// Initialize FilePond
+const pond = FilePond.create(document.querySelector('input[type="file"]'), {
+    acceptedFileTypes: ['image/*', 'video/mp4'],
+    allowMultiple: false,
+    instantUpload: false,
+    allowImagePreview: false
+});
+
+pond.on('addfile', () => renderPreviews());
+
+const platforms = {
+  instagram: {name:"Instagram", types:{profile:{w:320,h:320,shape:"circle"},feedLandscape:{w:1080,h:566,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},stories:{w:1080,h:1920,shape:"rect"}}},
+  facebook: {name:"Facebook", types:{profile:{w:196,h:196,shape:"circle"},cover:{w:851,h:315,shape:"rect"},feedLandscape:{w:1200,h:628,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},stories:{w:1080,h:1920,shape:"rect"}}},
+  x: {name:"X/Twitter", types:{profile:{w:400,h:400,shape:"circle"},header:{w:1500,h:500,shape:"rect"},feedLandscape:{w:1200,h:675,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},video:{w:1080,h:1920,shape:"rect"}}},
+  linkedin: {name:"LinkedIn", types:{profile:{w:400,h:400,shape:"circle"},background:{w:1584,h:396,shape:"rect"},feedLandscape:{w:1200,h:627,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1200,h:1200,shape:"rect"},video:{w:1080,h:1920,shape:"rect"}}},
+  youtube: {name:"YouTube", types:{profile:{w:800,h:800,shape:"circle"},cover:{w:2560,h:1440,shape:"rect"},thumbnail:{w:1280,h:720,shape:"rect"},community:{w:1080,h:1080,shape:"rect"},shorts:{w:1080,h:1920,shape:"rect"}}},
+  threads: {name:"Threads", types:{profile:{w:320,h:320,shape:"circle"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},video:{w:1080,h:1920,shape:"rect"}}},
+  whatsapp: {name:"WhatsApp", types:{profile:{w:640,h:640,shape:"circle"},cover:{w:1211,h:681,shape:"rect"},catalogProduct:{w:1080,h:1080,shape:"rect"},catalogCover:{w:1200,h:675,shape:"rect"},status:{w:1080,h:1920,shape:"rect"}}}
+};
+
+const previewGrid = document.getElementById("previewGrid");
+const platformCheckboxes = document.querySelectorAll(".platform-checkbox");
+const postTypeSelect = document.getElementById("postTypeSelect");
+
+// Default settings: all platforms + all post types
+const defaultPlatforms = Array.from(platformCheckboxes).map(cb => cb.value);
+const defaultPostType = "all";
+
+// Load saved settings or use defaults
+window.addEventListener("load", () => {
+  const savedPlatforms = JSON.parse(localStorage.getItem("selectedPlatforms") || JSON.stringify(defaultPlatforms));
+  const savedPostType = localStorage.getItem("selectedPostType") || defaultPostType;
+
+  platformCheckboxes.forEach(cb => cb.checked = savedPlatforms.includes(cb.value));
+  postTypeSelect.value = savedPostType;
+
+  renderPreviews();
+});
+
+// Save settings on change
+platformCheckboxes.forEach(cb => cb.addEventListener("change", () => {
+  saveSettings();
+  renderPreviews();
+}));
+postTypeSelect.addEventListener("change", () => {
+  saveSettings();
+  renderPreviews();
+});
+
+function saveSettings() {
+  const selectedPlatforms = Array.from(platformCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+  localStorage.setItem("selectedPlatforms", JSON.stringify(selectedPlatforms));
+  localStorage.setItem("selectedPostType", postTypeSelect.value);
+}
+
+function renderPreviews() {
+  const file = pond.getFiles()[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file.file);
+  const isVideo = file.file.type.startsWith("video");
+
+  previewGrid.innerHTML = "";
+  const selectedPlatforms = Array.from(platformCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+  const selectedPostType = postTypeSelect.value;
+
+  selectedPlatforms.forEach(pKey => {
+    const platform = platforms[pKey];
+    for (let typeKey in platform.types) {
+      if(isVideo && !["stories","video","shorts","status"].includes(typeKey)) continue;
+      if(!isVideo && ["stories","video","shorts","status"].includes(typeKey)) continue;
+
+      if(selectedPostType !== "all") {
+        if(selectedPostType === "profile" && !typeKey.includes("profile")) continue;
+        if(selectedPostType === "cover" && !["cover","background","header","channelArt"].includes(typeKey)) continue;
+        if(selectedPostType === "feed" && !["feed","thumbnail","community","catalogProduct","catalogCover"].some(k=>typeKey.includes(k))) continue;
+        if(selectedPostType === "stories" && !["stories","video","shorts","status"].includes(typeKey)) continue;
+      }
+
+      const dims = platform.types[typeKey];
+      const card = document.createElement("div");
+      card.className = "border rounded-lg bg-white shadow-md flex flex-col";
+
+      const label = document.createElement("div");
+      label.className = "text-sm font-semibold text-center p-1";
+      label.textContent = `${platform.name} - ${typeKey} (${dims.w}×${dims.h})`;
+      card.appendChild(label);
+
+      const box = document.createElement("div");
+      box.className = `aspect-box ${dims.shape === "circle" ? "profile-circle" : ""}`;
+      box.style.aspectRatio = `${dims.w}/${dims.h}`;
+
+      const media = document.createElement(isVideo ? "video" : "img");
+      media.src = url;
+      if(isVideo) media.controls = true;
+      box.appendChild(media);
+
+      card.appendChild(box);
+      previewGrid.appendChild(card);
+    }
+  });
+}
+</script>
+
+
+</body>
+
+</html>
