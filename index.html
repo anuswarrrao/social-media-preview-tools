@@ -1,228 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Social Media Preview Tool</title>
-  <link rel="icon" href="images.png"  type="image/x-icon" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social Media Preview Tool</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  * { font-family: 'Inter', sans-serif; }
 
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- FilePond CSS -->
-  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
-
-  <style>
-    .aspect-box {
-      position: relative;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      background: #f0f0f0;
-    }
-
-    .aspect-box img,
-    .aspect-box video {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: inherit;
-    }
-
-    .profile-circle img {
-      border-radius: 9999px;
-    }
-
-    /* Customize FilePond container */
-    .filepond--root {
-      height: 180px;
-      border: 2px dashed #4f46e5;
-      border-radius: 1rem;
-      background: #eef2ff;
-      font-size: 1.1rem;
-      padding: 1rem;
-      cursor: pointer;
-    }
-
-    /* Hover style */
-    .filepond--root:hover {
-      background: #e0e7ff;
-    }
-
-    /* Label styling inside FilePond */
-    .filepond--drop-label {
-      color: #4f46e5;
-      font-weight: 600;
-      font-size: 1rem;
-    }
-
-    /* Horizontal alignment for platforms + post type */
-    .platforms-posttype {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .platforms-checkboxes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-  </style>
+  .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+  .aspect-box { position: relative; width: 100%; display: flex; justify-content:center; align-items:center; overflow:hidden; background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+  .aspect-box img, .aspect-box video { position: absolute; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; transform: none; transition: none;}
+  .profile-circle { border-radius: 9999px; }
+  .upload-zone { border: 3px dashed #667eea; border-radius: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); cursor:pointer; position:relative; overflow:hidden; transition: all 0.3s ease; }
+  .upload-zone::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition:left 0.5s; }
+  .upload-zone:hover::before { left:100%; }
+  .upload-zone:hover { border-color:#764ba2; background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2)); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(102,126,234,0.2); }
+  .platform-card { cursor:pointer; border:2px solid transparent; background:white; transition: all 0.3s ease; }
+  .platform-card.selected { border-color:#667eea; background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05)); }
+  .filter-btn { border:2px solid #e5e7eb; transition: all 0.3s ease; }
+  .filter-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color:white; border-color:#667eea; }
+  .filter-btn:hover:not(.active) { border-color:#667eea; background-color: rgba(102,126,234,0.1); }
+  .platform-icon { width:24px; height:24px; }
+</style>
 </head>
+<body class="bg-gray-50 min-h-screen">
 
-<body class="bg-gray-100 min-h-screen p-4">
-  <div class="max-w-7xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-center">Social Media Preview Tool</h1>
+<!-- Header -->
+<div class="gradient-bg text-white py-8">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <h1 class="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
+      <i data-lucide="image" class="w-10 h-10"></i>
+      Social Media Preview Tool
+    </h1>
+    <p class="text-lg opacity-90">Preview your content across all major social platforms instantly</p>
+  </div>
+</div>
 
-    <!-- Upload -->
-    <div class="mb-6">
-      <input type="file" id="fileInput" class="filepond" accept="image/png, image/jpeg, video/mp4">
-    </div>
+<div class="max-w-7xl mx-auto px-4 py-8">
 
-    <!-- Platforms + Post Type in one horizontal line -->
-    <div class="mb-6 platforms-posttype">
-      <div class="platforms-checkboxes">
-        <label><input type="checkbox" class="platform-checkbox" value="instagram" checked> Instagram</label>
-        <label><input type="checkbox" class="platform-checkbox" value="facebook" checked> Facebook</label>
-        <label><input type="checkbox" class="platform-checkbox" value="x" checked> X/Twitter</label>
-        <label><input type="checkbox" class="platform-checkbox" value="linkedin" checked> LinkedIn</label>
-        <label><input type="checkbox" class="platform-checkbox" value="youtube" checked> YouTube</label>
-        <label><input type="checkbox" class="platform-checkbox" value="threads" checked> Threads</label>
-        <label><input type="checkbox" class="platform-checkbox" value="whatsapp" checked> WhatsApp</label>
+  <!-- Upload Section -->
+  <div class="glass-card rounded-2xl p-8 mb-8 shadow-lg">
+    <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+      <i data-lucide="upload-cloud" class="w-6 h-6 text-indigo-600"></i>
+      Upload Your Media
+    </h2>
+    <div class="upload-zone p-12 text-center relative">
+      <input type="file" id="fileInput" accept="image/*,video/mp4" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+      <div class="space-y-4">
+        <i data-lucide="image-plus" class="w-16 h-16 mx-auto text-indigo-500"></i>
+        <div>
+          <p class="text-xl font-semibold text-gray-700 mb-2">Drop your image or video here</p>
+          <p class="text-gray-500">Supports JPG, PNG, MP4 files</p>
+        </div>
       </div>
-      <div>
-        <select id="postTypeSelect" class="border p-2 rounded">
-          <option value="all">All Post Types</option>
-          <option value="profile">Profile Photo</option>
-          <option value="cover">Cover/Background/Channel Art</option>
-          <option value="feed">Feed/Posts</option>
-          <option value="stories">Stories/Reels/Shorts/Videos</option>
-        </select>
-      </div>
     </div>
-
-    <!-- Preview Grid -->
-    <div id="previewGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
   </div>
 
-  <!-- FilePond JS -->
-  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
-  <script
-    src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+  <!-- Combined Platform & Filter Section -->
+  <div class="glass-card rounded-2xl p-8 mb-8 shadow-lg">
+    <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+      <i data-lucide="globe" class="w-6 h-6 text-indigo-600"></i>
+      Platforms & Content Type
+    </h2>
 
-  <script>
-FilePond.registerPlugin(FilePondPluginFileValidateType);
+    <!-- Platforms -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6" id="platformGrid"></div>
 
-// Initialize FilePond
-const pond = FilePond.create(document.querySelector('input[type="file"]'), {
-    acceptedFileTypes: ['image/*', 'video/mp4'],
-    allowMultiple: false,
-    instantUpload: false,
-    allowImagePreview: false
-});
+    <!-- Filter -->
+    <div class="flex flex-wrap gap-3">
+      <button class="filter-btn px-4 py-2 rounded-lg font-medium" data-filter="all">All Types</button>
+      <button class="filter-btn px-4 py-2 rounded-lg font-medium" data-filter="profile">Profile Photos</button>
+      <button class="filter-btn px-4 py-2 rounded-lg font-medium" data-filter="cover">Cover Images</button>
+      <button class="filter-btn px-4 py-2 rounded-lg font-medium" data-filter="feed">Feed Posts</button>
+      <button class="filter-btn px-4 py-2 rounded-lg font-medium" data-filter="stories">Stories & Videos</button>
+    </div>
+  </div>
 
-pond.on('addfile', () => renderPreviews());
+  <!-- Preview Section -->
+  <div id="previewGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+  <div id="emptyState" class="text-center py-20">
+    <i data-lucide="image-off" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-600 mb-2">No previews to show</h3>
+    <p class="text-gray-500">Upload an image or video to see previews across all platforms</p>
+  </div>
+</div>
+
+<script>
+lucide.createIcons();
 
 const platforms = {
-  instagram: {name:"Instagram", types:{profile:{w:320,h:320,shape:"circle"},feedLandscape:{w:1080,h:566,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},stories:{w:1080,h:1920,shape:"rect"}}},
-  facebook: {name:"Facebook", types:{profile:{w:196,h:196,shape:"circle"},cover:{w:851,h:315,shape:"rect"},feedLandscape:{w:1200,h:628,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},stories:{w:1080,h:1920,shape:"rect"}}},
-  x: {name:"X/Twitter", types:{profile:{w:400,h:400,shape:"circle"},header:{w:1500,h:500,shape:"rect"},feedLandscape:{w:1200,h:675,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},video:{w:1080,h:1920,shape:"rect"}}},
-  linkedin: {name:"LinkedIn", types:{profile:{w:400,h:400,shape:"circle"},background:{w:1584,h:396,shape:"rect"},feedLandscape:{w:1200,h:627,shape:"rect"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1200,h:1200,shape:"rect"},video:{w:1080,h:1920,shape:"rect"}}},
-  youtube: {name:"YouTube", types:{profile:{w:800,h:800,shape:"circle"},cover:{w:2560,h:1440,shape:"rect"},thumbnail:{w:1280,h:720,shape:"rect"},community:{w:1080,h:1080,shape:"rect"},shorts:{w:1080,h:1920,shape:"rect"}}},
-  threads: {name:"Threads", types:{profile:{w:320,h:320,shape:"circle"},feedPortrait:{w:1080,h:1350,shape:"rect"},feedSquare:{w:1080,h:1080,shape:"rect"},video:{w:1080,h:1920,shape:"rect"}}},
-  whatsapp: {name:"WhatsApp", types:{profile:{w:640,h:640,shape:"circle"},cover:{w:1211,h:681,shape:"rect"},catalogProduct:{w:1080,h:1080,shape:"rect"},catalogCover:{w:1200,h:675,shape:"rect"},status:{w:1080,h:1920,shape:"rect"}}}
+  instagram: { name:"Instagram", icon:"instagram", color:"#E4405F", types:{ profile:{w:320,h:320,shape:"circle",label:"Profile Photo"}, feedLandscape:{w:1080,h:566,shape:"rect",label:"Feed (Landscape)"}, feedPortrait:{w:1080,h:1350,shape:"rect",label:"Feed (Portrait)"}, feedSquare:{w:1080,h:1080,shape:"rect",label:"Feed (Square)"}, stories:{w:1080,h:1920,shape:"rect",label:"Stories"} } },
+  facebook: { name:"Facebook", icon:"facebook", color:"#1877F2", types:{ profile:{w:196,h:196,shape:"circle",label:"Profile Photo"}, cover:{w:851,h:315,shape:"rect",label:"Cover Photo"}, feedLandscape:{w:1200,h:628,shape:"rect",label:"Feed (Landscape)"}, feedPortrait:{w:1080,h:1350,shape:"rect",label:"Feed (Portrait)"}, feedSquare:{w:1080,h:1080,shape:"rect",label:"Feed (Square)"}, stories:{w:1080,h:1920,shape:"rect",label:"Stories"} } },
+  x: { name:"X/Twitter", icon:"twitter", color:"#000000", types:{ profile:{w:400,h:400,shape:"circle",label:"Profile Photo"}, header:{w:1500,h:500,shape:"rect",label:"Header Image"}, feedLandscape:{w:1200,h:675,shape:"rect",label:"Feed (Landscape)"}, feedPortrait:{w:1080,h:1350,shape:"rect",label:"Feed (Portrait)"}, feedSquare:{w:1080,h:1080,shape:"rect",label:"Feed (Square)"}, video:{w:1080,h:1920,shape:"rect",label:"Video"} } },
+  linkedin: { name:"LinkedIn", icon:"linkedin", color:"#0A66C2", types:{ profile:{w:400,h:400,shape:"circle",label:"Profile Photo"}, background:{w:1584,h:396,shape:"rect",label:"Background"}, feedLandscape:{w:1200,h:627,shape:"rect",label:"Feed (Landscape)"}, feedPortrait:{w:1080,h:1350,shape:"rect",label:"Feed (Portrait)"}, feedSquare:{w:1200,h:1200,shape:"rect",label:"Feed (Square)"}, video:{w:1080,h:1920,shape:"rect",label:"Video"} } },
+  youtube: { name:"YouTube", icon:"youtube", color:"#FF0000", types:{ profile:{w:800,h:800,shape:"circle",label:"Profile Photo"}, cover:{w:2560,h:1440,shape:"rect",label:"Channel Art"}, thumbnail:{w:1280,h:720,shape:"rect",label:"Thumbnail"}, community:{w:1080,h:1080,shape:"rect",label:"Community Post"}, shorts:{w:1080,h:1920,shape:"rect",label:"Shorts"} } },
+  threads: { name:"Threads", icon:"message-circle", color:"#000000", types:{ profile:{w:320,h:320,shape:"circle",label:"Profile Photo"}, feedPortrait:{w:1080,h:1350,shape:"rect",label:"Feed (Portrait)"}, feedSquare:{w:1080,h:1080,shape:"rect",label:"Feed (Square)"}, video:{w:1080,h:1920,shape:"rect",label:"Video"} } },
+  whatsapp: { name:"WhatsApp", icon:"message-circle", color:"#25D366", types:{ profile:{w:640,h:640,shape:"circle",label:"Profile Photo"}, cover:{w:1211,h:681,shape:"rect",label:"Group Cover"}, catalogProduct:{w:1080,h:1080,shape:"rect",label:"Catalog Product"}, catalogCover:{w:1200,h:675,shape:"rect",label:"Catalog Cover"}, status:{w:1080,h:1920,shape:"rect",label:"Status"} } }
 };
 
-const previewGrid = document.getElementById("previewGrid");
-const platformCheckboxes = document.querySelectorAll(".platform-checkbox");
-const postTypeSelect = document.getElementById("postTypeSelect");
+const fileInput = document.getElementById('fileInput');
+const platformGrid = document.getElementById('platformGrid');
+const previewGrid = document.getElementById('previewGrid');
+const emptyState = document.getElementById('emptyState');
 
-// Default settings: all platforms + all post types
-const defaultPlatforms = Array.from(platformCheckboxes).map(cb => cb.value);
-const defaultPostType = "all";
+let currentFile = null;
 
-// Load saved settings or use defaults
-window.addEventListener("load", () => {
-  const savedPlatforms = JSON.parse(localStorage.getItem("selectedPlatforms") || JSON.stringify(defaultPlatforms));
-  const savedPostType = localStorage.getItem("selectedPostType") || defaultPostType;
+// Load saved platforms & filter from localStorage
+let savedPlatforms = JSON.parse(localStorage.getItem('selectedPlatforms'));
+let savedFilter = localStorage.getItem('currentFilter');
+let selectedPlatforms = savedPlatforms ? new Set(savedPlatforms) : new Set(Object.keys(platforms));
+let currentFilter = savedFilter || 'all';
 
-  platformCheckboxes.forEach(cb => cb.checked = savedPlatforms.includes(cb.value));
-  postTypeSelect.value = savedPostType;
-
-  renderPreviews();
+// Update filter button UI
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.classList.remove('active');
+  if(btn.dataset.filter===currentFilter) btn.classList.add('active');
 });
 
-// Save settings on change
-platformCheckboxes.forEach(cb => cb.addEventListener("change", () => {
-  saveSettings();
-  renderPreviews();
-}));
-postTypeSelect.addEventListener("change", () => {
-  saveSettings();
-  renderPreviews();
-});
-
-function saveSettings() {
-  const selectedPlatforms = Array.from(platformCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
-  localStorage.setItem("selectedPlatforms", JSON.stringify(selectedPlatforms));
-  localStorage.setItem("selectedPostType", postTypeSelect.value);
+function createPlatformCards(){
+  platformGrid.innerHTML='';
+  Object.entries(platforms).forEach(([key,platform])=>{
+    const card=document.createElement('div');
+    card.className='platform-card p-4 rounded-xl text-center';
+    if(selectedPlatforms.has(key)) card.classList.add('selected');
+    card.dataset.platform=key;
+    card.innerHTML=`<div class="mb-2"><i data-lucide="${platform.icon}" class="platform-icon mx-auto" style="color:${platform.color}"></i></div>
+      <h3 class="font-medium text-gray-800 text-sm">${platform.name}</h3>`;
+    card.addEventListener('click',()=>togglePlatform(key));
+    platformGrid.appendChild(card);
+  });
+  lucide.createIcons();
 }
 
-function renderPreviews() {
-  const file = pond.getFiles()[0];
-  if(!file) return;
-  const url = URL.createObjectURL(file.file);
-  const isVideo = file.file.type.startsWith("video");
+function togglePlatform(key){
+  const card=document.querySelector(`[data-platform="${key}"]`);
+  if(selectedPlatforms.has(key)){
+    selectedPlatforms.delete(key); card.classList.remove('selected');
+  }else{
+    selectedPlatforms.add(key); card.classList.add('selected');
+  }
+  localStorage.setItem('selectedPlatforms', JSON.stringify([...selectedPlatforms]));
+  renderPreviews();
+}
 
-  previewGrid.innerHTML = "";
-  const selectedPlatforms = Array.from(platformCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
-  const selectedPostType = postTypeSelect.value;
+fileInput.addEventListener('change',()=>{
+  currentFile=fileInput.files[0];
+  renderPreviews();
+});
 
-  selectedPlatforms.forEach(pKey => {
-    const platform = platforms[pKey];
-    for (let typeKey in platform.types) {
-      if(isVideo && !["stories","video","shorts","status"].includes(typeKey)) continue;
-      if(!isVideo && ["stories","video","shorts","status"].includes(typeKey)) continue;
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentFilter=e.target.dataset.filter;
+    localStorage.setItem('currentFilter', currentFilter);
+    renderPreviews();
+  });
+});
 
-      if(selectedPostType !== "all") {
-        if(selectedPostType === "profile" && !typeKey.includes("profile")) continue;
-        if(selectedPostType === "cover" && !["cover","background","header","channelArt"].includes(typeKey)) continue;
-        if(selectedPostType === "feed" && !["feed","thumbnail","community","catalogProduct","catalogCover"].some(k=>typeKey.includes(k))) continue;
-        if(selectedPostType === "stories" && !["stories","video","shorts","status"].includes(typeKey)) continue;
+function renderPreviews(){
+  if(!currentFile || selectedPlatforms.size===0){
+    previewGrid.innerHTML=''; emptyState.style.display='block'; return;
+  }
+  emptyState.style.display='none'; previewGrid.innerHTML='';
+  const url=URL.createObjectURL(currentFile); 
+  const isVideo=currentFile.type.startsWith('video');
+  
+  selectedPlatforms.forEach(platformKey=>{
+    const platform=platforms[platformKey];
+    Object.entries(platform.types).forEach(([typeKey,dim])=>{
+      if(isVideo && !['stories','video'].includes(typeKey)) return;
+      if(!isVideo && ['stories','video'].includes(typeKey)) return;
+      if(currentFilter!=='all'){
+        if(currentFilter==='profile'&&!typeKey.includes('profile')) return;
+        if(currentFilter==='cover'&&!['cover','background','header'].includes(typeKey)) return;
+        if(currentFilter==='feed'&&!typeKey.includes('feed')) return;
+        if(currentFilter==='stories'&&!['stories','video'].includes(typeKey)) return;
       }
-
-      const dims = platform.types[typeKey];
-      const card = document.createElement("div");
-      card.className = "border rounded-lg bg-white shadow-md flex flex-col";
-
-      const label = document.createElement("div");
-      label.className = "text-sm font-semibold text-center p-1";
-      label.textContent = `${platform.name} - ${typeKey} (${dims.w}×${dims.h})`;
-      card.appendChild(label);
-
-      const box = document.createElement("div");
-      box.className = `aspect-box ${dims.shape === "circle" ? "profile-circle" : ""}`;
-      box.style.aspectRatio = `${dims.w}/${dims.h}`;
-
-      const media = document.createElement(isVideo ? "video" : "img");
-      media.src = url;
-      if(isVideo) media.controls = true;
-      box.appendChild(media);
-
-      card.appendChild(box);
+      const card=document.createElement('div');
+      card.className='preview-card rounded-xl shadow-md overflow-hidden mb-6';
+      card.innerHTML=`<div class="p-4 border-b bg-gray-50">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="${platform.icon}" class="w-4 h-4" style="color:${platform.color}"></i>
+            <span class="font-semibold text-sm">${platform.name}</span>
+          </div>
+          <span class="text-xs text-gray-500">${dim.w}×${dim.h}</span>
+        </div>
+        <p class="text-xs text-gray-600 mt-1">${dim.label}</p>
+      </div>
+      <div class="p-4"><div class="aspect-box ${dim.shape==='circle'?'profile-circle':''}" style="aspect-ratio:${dim.w}/${dim.h}">
+        ${isVideo?`<video src="${url}" controls class="rounded-lg"></video>`:`<img src="${url}" alt="Preview" class="rounded-lg">`}
+      </div></div>`;
       previewGrid.appendChild(card);
-    }
+    });
   });
 }
+
+createPlatformCards();
+renderPreviews();
 </script>
 
-
 </body>
-
 </html>
